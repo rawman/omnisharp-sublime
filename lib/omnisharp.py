@@ -14,6 +14,7 @@ from .helpers import quote_path
 from .helpers import get_settings
 from .helpers import current_solution_filepath_or_project_rootpath
 from .urllib3 import PoolManager
+from .helpers import appendBuffer
 
 IS_EXTERNAL_SERVER_ENABLE = False
 
@@ -58,6 +59,23 @@ class WorkerThread(threading.Thread):
             else:
                 set_omnisharp_status("Server Not Running")
             self.callback(None)
+
+class StartServer(threading.Thread):
+    def __init__(self, args):
+        self.args = args
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            print("Starting Omnisharp server")
+
+            proc = subprocess.Popen(self.args, stdout=subprocess.PIPE)
+            for line in proc.stdout:
+                appendBuffer(line.decode().replace('\r\n', '\n'))
+
+            print("Exit Omnisharp server watcher")
+        except Exception as ex:
+            sublime.error_message(ex)
 
 
 def get_response(view, endpoint, callback, params=None, timeout=None):
@@ -126,18 +144,18 @@ def create_omnisharp_server_subprocess(view):
             omni_exe_path = quote_path(omni_exe_paths[0])
 
             args = [
-                omni_exe_path, 
-                '-s', quote_path(solution_path),
+                omni_exe_paths[0],
+                '-s', solution_path,
                 '-p', str(omni_port),
-                '-config', quote_path(config_file),
+                '-config', config_file,
                 '--hostPID', str(os.getpid())
             ]
 
             cmd = ' '.join(args)
             print(cmd)
             
-            view.window().run_command("exec",{"cmd":cmd,"shell":"true","quiet":"true"})
-            view.window().run_command("hide_panel", {"panel": "output.exec"})
+            s = StartServer(args)
+            s.start()
 
             set_omnisharp_status("Loading Project")
             sublime.set_timeout(lambda:check_solution_ready_status(view), 5000)

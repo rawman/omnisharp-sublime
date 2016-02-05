@@ -23,6 +23,7 @@ from .navigate_to import OmniSharpNavigateTo
 from .show_server_output import OmniSharpShowServerOutput
 from .navigate_code_issues import OmniSharpNextCodeIssue
 from .navigate_code_issues import OmniSharpLastCodeIssue
+from .append_to_server_output import AppendToServerOutput
 
 __all__ = [
     'OmniSharpGoToDefinition',
@@ -49,5 +50,6 @@ __all__ = [
     'OmniSharpNavigateTo',
     'OmniSharpShowServerOutput',
     'OmniSharpNextCodeIssue',
-    'OmniSharpLastCodeIssue'
+    'OmniSharpLastCodeIssue',
+    'AppendToServerOutput'
 ]

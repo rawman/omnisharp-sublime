@@ -2,6 +2,29 @@ import sublime
 import os
 import fnmatch
 
+from collections import deque
+
+server_buffer = deque([])
+server_buffer_callback = lambda x: 0
+
+def appendBuffer(text):
+    global server_buffer
+    global server_buffer_callback
+    server_buffer.append(text)
+    if len(server_buffer) > 100:
+        server_buffer.popleft()
+    #server_buffer = server_buffer + text
+    server_buffer_callback(text)
+
+def getBuffer(calback):
+    global server_buffer
+    global server_buffer_callback
+    server_buffer_callback = calback
+    all = ''
+    for elt in server_buffer:
+        all += elt
+    return all
+
 def is_csharp(view):
     if len(view.sel()) == 0:
         return False
